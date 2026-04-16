@@ -1,0 +1,94 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink: #0d0d0d; --cream: #f5f0e8; --rust: #c84b2f;
+      --gold: #d4a843; --muted: #6b6560; --border: #e2ddd6;
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream); color: var(--ink);
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 4rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; text-decoration: none; color: var(--ink); }
+    .logo span { color: var(--rust); }
+    .nav-back { text-decoration: none; color: var(--muted); font-size: 0.88rem; font-weight: 500; }
+    .nav-back:hover { color: var(--ink); }
+
+    .auth-layout {
+      flex: 1; display: grid; grid-template-columns: 1fr 1fr;
+    }
+
+    .auth-panel {
+      padding: 4rem;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+
+    .auth-visual {
+      background: var(--ink);
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 4rem; position: relative; overflow: hidden;
+    }
+    .auth-visual::before {
+      content: 'DY';
+      position: absolute; bottom: -4rem; right: -2rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 18rem; font-weight: 900; color: rgba(255,255,255,0.03);
+      line-height: 1; pointer-events: none;
+    }
+
+    .visual-tag { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.5rem; }
+    .visual-title { font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 900; color: white; line-height: 1.15; margin-bottom: 1.5rem; }
+    .visual-title em { color: var(--rust); font-style: normal; }
+    .visual-desc { color: rgba(245,240,232,0.5); font-size: 0.92rem; line-height: 1.7; max-width: 340px; margin-bottom: 2.5rem; }
+
+    .benefit { display: flex; align-items: flex-start; gap: 0.8rem; margin-bottom: 1rem; }
+    .benefit-icon { background: var(--rust); color: white; width: 28px; height: 28px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .benefit-text { font-size: 0.88rem; color: rgba(245,240,232,0.7); line-height: 1.5; }
+    .benefit-text strong { color: white; display: block; margin-bottom: 0.1rem; }
+
+    .form-tag { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rust); margin-bottom: 0.6rem; }
+    .form-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem; }
+    .form-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 2.5rem; }
+    .form-sub a { color: var(--rust); text-decoration: none; font-weight: 600; }
+
+    .field { margin-bottom: 1.2rem; }
+    .field label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 0.45rem; color: var(--ink); }
+    .field input {
+      width: 100%; padding: 0.85rem 1rem;
+      border: 2px solid var(--border); border-radius: 2px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.92rem;
+      background: white; color: var(--ink); outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus { border-color: var(--rust); }
+
+    .btn-submit {
+      width: 100%; padding: 1rem;
+      background: var(--rust); color: white;
+      border: none; border-radius: 2px;
+      font-family: 'DM Sans', sans-serif; font-size: 1rem;
+      font-weight: 700; cursor: pointer; transition: background 0.2s;
+      margin-top: 0.5rem;
+    }
+    .btn-submit:hover { background: #b03f25; }
+
+    .msg {
+      padding: 0.8rem 1rem; border-radius: 2px;
+      font-size: 0.88rem; margin-bottom: 1rem; display: none;
+    }
+    .msg.success { background: #d4edda; color: #1a5c2e; border: 1px solid #a8d5b5; display: block; }
+    .msg.error { background: #fde8e4; color: #8b2a1a; border: 1px solid #f5c0b0; display: block; }
+
+    @media (max-width: 850px) {
+      nav { padding: 1rem 1.5rem; }
+      .auth-layout { grid-template-columns: 1fr; }
+      .auth-visual { display: none; }
+      .auth-panel { padding: 2.5rem 1.5rem; }
+    }

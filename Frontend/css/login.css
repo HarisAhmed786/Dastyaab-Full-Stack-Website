@@ -1,0 +1,80 @@
+
+    
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink: #0d0d0d; --cream: #f5f0e8; --rust: #c84b2f;
+      --gold: #d4a843; --muted: #6b6560; --border: #e2ddd6;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 4rem; border-bottom: 1px solid var(--border); }
+    .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; text-decoration: none; color: var(--ink); }
+    .logo span { color: var(--rust); }
+    .nav-back { text-decoration: none; color: var(--muted); font-size: 0.88rem; font-weight: 500; }
+    .nav-back:hover { color: var(--ink); }
+
+    .auth-layout { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
+
+    .auth-visual {
+      background: var(--rust);
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 4rem; position: relative; overflow: hidden;
+      order: -1;
+    }
+    .auth-visual::before {
+      content: '→';
+      position: absolute; bottom: -3rem; left: -1rem;
+      font-size: 22rem; font-weight: 900; color: rgba(0,0,0,0.08);
+      line-height: 1; pointer-events: none;
+    }
+
+    .visual-tag { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 1.5rem; }
+    .visual-title { font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 900; color: white; line-height: 1.15; margin-bottom: 1.2rem; }
+    .visual-desc { color: rgba(255,255,255,0.65); font-size: 0.92rem; line-height: 1.7; max-width: 320px; margin-bottom: 2.5rem; }
+
+    .quote {
+      border-left: 3px solid rgba(255,255,255,0.4);
+      padding-left: 1.2rem; margin-top: 1rem;
+    }
+    .quote-text { font-size: 1rem; color: white; line-height: 1.6; font-style: italic; margin-bottom: 0.5rem; }
+    .quote-author { font-size: 0.78rem; color: rgba(255,255,255,0.5); font-weight: 600; }
+
+    .auth-panel { padding: 4rem; display: flex; flex-direction: column; justify-content: center; }
+
+    .form-tag { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rust); margin-bottom: 0.6rem; }
+    .form-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem; }
+    .form-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 2.5rem; }
+    .form-sub a { color: var(--rust); text-decoration: none; font-weight: 600; }
+
+    .field { margin-bottom: 1.2rem; }
+    .field label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 0.45rem; }
+    .field input {
+      width: 100%; padding: 0.85rem 1rem;
+      border: 2px solid var(--border); border-radius: 2px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.92rem;
+      background: white; color: var(--ink); outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus { border-color: var(--rust); }
+
+    .btn-submit {
+      width: 100%; padding: 1rem;
+      background: var(--ink); color: white;
+      border: none; border-radius: 2px;
+      font-family: 'DM Sans', sans-serif; font-size: 1rem;
+      font-weight: 700; cursor: pointer; transition: background 0.2s;
+      margin-top: 0.5rem;
+    }
+    .btn-submit:hover { background: var(--rust); }
+
+    .msg { padding: 0.8rem 1rem; border-radius: 2px; font-size: 0.88rem; margin-bottom: 1rem; display: none; }
+    .msg.success { background: #d4edda; color: #1a5c2e; border: 1px solid #a8d5b5; display: block; }
+    .msg.error { background: #fde8e4; color: #8b2a1a; border: 1px solid #f5c0b0; display: block; }
+
+    @media (max-width: 850px) {
+      nav { padding: 1rem 1.5rem; }
+      .auth-layout { grid-template-columns: 1fr; }
+      .auth-visual { display: none; }
+      .auth-panel { padding: 2.5rem 1.5rem; order: 0; }
+    }

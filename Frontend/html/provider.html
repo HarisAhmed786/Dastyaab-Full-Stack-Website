@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Join as Provider — Dastyaab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/provider.css" />
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="logo">Dasty<span>aab</span></a>
+    <ul class="nav-links">
+      <li><a href="search.html">Find Providers</a></li>
+      <li><a href="provider.html">Join as Provider</a></li>
+      <li><a href="login.html">Login</a></li>
+      <li><a href="register.html" class="nav-cta">Register</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <div>
+      <div class="hero-tag">Professional Opportunity</div>
+      <h1 class="hero-title">Grow Your<br>Business with<br><em>Dastyaab</em></h1>
+      <p class="hero-sub">List your services, reach customers actively searching for your expertise, and grow your client base — for free.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat">
+        <span class="hstat-num">8K+</span>
+        <span class="hstat-label">Active Users</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-num">Free</span>
+        <span class="hstat-label">To Join</span>
+      </div>
+      <div class="hstat">
+        <span class="hstat-num">15+</span>
+        <span class="hstat-label">Categories</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <!-- FORM -->
+    <div>
+      <div class="form-card">
+        <div class="form-card-header">
+          <h2>Create Your Provider Profile</h2>
+          <p>Fill in your details to start appearing in search results</p>
+        </div>
+        <div class="form-body">
+          <div id="msg" class="msg"></div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Full Name</label>
+              <input type="text" id="name" placeholder="Your full name" oninput="updatePreview()" />
+            </div>
+            <div class="field">
+              <label>Service Type</label>
+              <select id="service" onchange="updatePreview()">
+                <option value="">Select a service…</option>
+                <option>Electrician</option>
+                <option>Plumber</option>
+                <option>Carpenter</option>
+                <option>Painter</option>
+                <option>Cleaner</option>
+                <option>AC Technician</option>
+                <option>Mason</option>
+                <option>Welder</option>
+                <option>Gardener</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Location / Area</label>
+              <input type="text" id="location" placeholder="e.g. Karachi, Lahore" oninput="updatePreview()" />
+            </div>
+            <div class="field">
+              <label>Years of Experience</label>
+              <input type="number" id="experience" placeholder="e.g. 5" min="0" oninput="updatePreview()" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Contact Number</label>
+            <input type="text" id="contact" placeholder="e.g. 0300-1234567" oninput="updatePreview()" />
+          </div>
+
+          <button class="btn-submit" onclick="createProvider()">List My Services →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <!-- Live Preview -->
+      <div>
+        <p style="font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem;">Live Card Preview</p>
+        <div class="preview-card">
+          <div class="preview-label">Your listing will appear like this</div>
+          <div class="preview-name" id="prev-name">Your Name</div>
+          <div class="preview-service" id="prev-service">Service Type</div>
+          <div class="preview-meta" id="prev-meta">📍 Location<br>⏱ Experience<br>📞 Contact</div>
+          <span class="preview-badge">✓ Verified</span>
+        </div>
+      </div>
+
+      <!-- Perks -->
+      <div class="info-card">
+        <div class="info-card-header">
+          <h3>Why Join Dastyaab?</h3>
+        </div>
+        <div class="info-card-body">
+          <div class="perk">
+            <div class="perk-icon">🚀</div>
+            <div>
+              <div class="perk-title">Instant Visibility</div>
+              <div class="perk-desc">Appear in searches immediately after listing. Reach customers in your area right away.</div>
+            </div>
+          </div>
+          <div class="perk">
+            <div class="perk-icon">💸</div>
+            <div>
+              <div class="perk-title">Always Free</div>
+              <div class="perk-desc">No subscription, no commission. Your listing is completely free, forever.</div>
+            </div>
+          </div>
+          <div class="perk">
+            <div class="perk-icon">⭐</div>
+            <div>
+              <div class="perk-title">Build Your Reputation</div>
+              <div class="perk-desc">Earn ratings and reviews from customers to stand out from competition.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <a href="index.html" class="logo">Dasty<span>aab</span></a>
+    <span>© 2025 Dastyaab</span>
+    <a href="search.html" style="color:var(--rust);text-decoration:none;font-weight:600;">Find Providers →</a>
+  </footer>
+
+  
+  <!-- JavaScript -->
+  <script>
+    function updatePreview() {
+      const name = document.getElementById('name').value || 'Your Name';
+      const service = document.getElementById('service').value || 'Service Type';
+      const location = document.getElementById('location').value;
+      const exp = document.getElementById('experience').value;
+      const contact = document.getElementById('contact').value;
+
+      document.getElementById('prev-name').textContent = name;
+      document.getElementById('prev-service').textContent = service;
+
+      let meta = '';
+      if (location) meta += `📍 ${location}<br>`;
+      if (exp) meta += `⏱ ${exp} year${exp !== '1' ? 's' : ''} experience<br>`;
+      if (contact) meta += `📞 ${contact}`;
+      document.getElementById('prev-meta').innerHTML = meta || '📍 Location<br>⏱ Experience<br>📞 Contact';
+    }
+
+    async function createProvider() {
+      const name = document.getElementById('name').value.trim();
+      const service = document.getElementById('service').value;
+      const location = document.getElementById('location').value.trim();
+      const experience = document.getElementById('experience').value;
+      const contact = document.getElementById('contact').value.trim();
+      const msg = document.getElementById('msg');
+      msg.className = 'msg'; msg.style.display = 'none';
+
+      if (!name || !service || !location || !contact) {
+        msg.textContent = 'Please fill in all required fields (Name, Service, Location, Contact).';
+        msg.className = 'msg error'; return;
+      }
+
+      try {
+        const res = await fetch('http://localhost:5000/api/provider', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, service, location, experience, contact })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          msg.textContent = '✓ Profile created! You now appear in search results.';
+          msg.className = 'msg success';
+          setTimeout(() => window.location.href = `search.html?service=${encodeURIComponent(service)}`, 2000);
+        } else {
+          msg.textContent = data.message || 'Something went wrong. Please try again.';
+          msg.className = 'msg error';
+        }
+      } catch {
+        msg.textContent = 'Cannot connect to server. Is it running on port 5000?';
+        msg.className = 'msg error';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register — Dastyaab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/register.css" />
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="logo">Dasty<span>aab</span></a>
+    <a href="index.html" class="nav-back">← Back to Home</a>
+  </nav>
+
+  <div class="auth-layout">
+    <div class="auth-panel">
+      <div class="form-tag">New Account</div>
+      <h1 class="form-title">Create Your Account</h1>
+      <p class="form-sub">Already have an account? <a href="login.html">Sign in here</a></p>
+
+      <div id="msg" class="msg"></div>
+
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="name" placeholder="e.g. Ahmed Raza" />
+      </div>
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="you@example.com" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Create a strong password" />
+      </div>
+
+      <button class="btn-submit" onclick="register()">Create Account →</button>
+    </div>
+
+    <div class="auth-visual">
+      <div class="visual-tag">Join Dastyaab</div>
+      <h2 class="visual-title">Your Next Expert is<br><em>One Click Away</em></h2>
+      <p class="visual-desc">Join thousands of users who trust Dastyaab to connect with reliable local professionals every day.</p>
+      <div class="benefit">
+        <div class="benefit-icon">✓</div>
+        <div class="benefit-text"><strong>Verified Professionals</strong>Every provider is reviewed and rated by real customers.</div>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">⚡</div>
+        <div class="benefit-text"><strong>Fast Matching</strong>Find the right expert for your job in seconds.</div>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">🔒</div>
+        <div class="benefit-text"><strong>Safe & Secure</strong>Your data is protected. Always.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- JavaScript -->
+  <script>
+    async function register() {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('msg');
+      msg.className = 'msg'; msg.style.display = 'none';
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text;
+  el.className   = `msg ${type}`;
+}
+      if (!name || !email || !password) {
+        showMsg('Please fill in all fields.', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch('http://localhost:5000/api/register', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showMsg('✓ Account created! Redirecting to login…', 'success');
+          setTimeout(() => window.location.href = 'login.html', 1800);
+        } else {
+          showMsg(data.message || 'Registration failed. Please try again.', 'error');
+        }
+      } catch {
+        showMsg('Cannot connect to server. Is it running?', 'error');
+      }
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') register(); });
+  </script>
+</body>
+</html>
