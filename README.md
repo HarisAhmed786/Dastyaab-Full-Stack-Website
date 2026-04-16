@@ -76,6 +76,7 @@ Whether you need an electrician at midnight or a plumber on a weekend, Dastyaab 
 ---
 
 ## Project Structure
+```text
 Dastyaab/
 │
 ├── backend/
@@ -104,23 +105,23 @@ Dastyaab/
 ├── login.css            # Login page styles
 ├── search.css           # Search page styles
 └── provider.css         # Provider page styles
-
+```
 ## Screenshots
 
 ### Home Page
-![Home Page](https://placehold.co/1200x650/0d0d0d/f5f0e8?text=Home+Page+—+Hero+Section)
+![Home Page](images/home.png)
 
 ### Search & Browse Providers
-![Search Page](https://placehold.co/1200x650/c84b2f/ffffff?text=Search+Page+—+Provider+Cards)
+![Search Page](images/Services.png)
 
 ### User Registration
-![Register Page](https://placehold.co/1200x650/f5f0e8/0d0d0d?text=Register+Page+—+Account+Creation)
+![Register Page](images/signup.png)
 
 ### User Login
-![Login Page](https://placehold.co/1200x650/c84b2f/ffffff?text=Login+Page+—+Sign+In)
+![Login Page](images/login.png)
 
 ### Join as Provider
-![Provider Page](https://placehold.co/1200x650/d4a843/0d0d0d?text=Provider+Page+—+List+Your+Services)
+![Provider Page](images/ProviderAccount.png)
 
 ---
 
