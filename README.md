@@ -2,8 +2,6 @@
 
 <div align="center">
 
-![Dastyaab Banner](images/home.png)
-
 **A full-stack web platform connecting users with verified local service professionals.**
 
 [![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
