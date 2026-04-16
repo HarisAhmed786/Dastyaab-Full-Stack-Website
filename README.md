@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Dastyaab Banner](https://placehold.co/1200x400/0d0d0d/f5f0e8?text=Dastyaab+%E2%80%94+Find+Local+Experts)
+![Dastyaab Banner](images/home.png)
 
 **A full-stack web platform connecting users with verified local service professionals.**
 
