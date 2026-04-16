@@ -75,6 +75,25 @@ Whether you need an electrician at midnight or a plumber on a weekend, Dastyaab 
 
 ---
 
+## Web Pages
+
+### Home Page
+![Home Page](images/home.png)
+
+### Search & Browse Providers
+![Search Page](images/Services.png)
+
+### User Registration
+![Register Page](images/signup.png)
+
+### User Login
+![Login Page](images/login.png)
+
+### Join as Provider
+![Provider Page](images/ProviderAccount.png)
+
+---
+
 ## Project Structure
 ```text
 Dastyaab/
@@ -106,25 +125,6 @@ Dastyaab/
 ├── search.css           # Search page styles
 └── provider.css         # Provider page styles
 ```
-## Screenshots
-
-### Home Page
-![Home Page](images/home.png)
-
-### Search & Browse Providers
-![Search Page](images/Services.png)
-
-### User Registration
-![Register Page](images/signup.png)
-
-### User Login
-![Login Page](images/login.png)
-
-### Join as Provider
-![Provider Page](images/ProviderAccount.png)
-
----
-
 ## Getting Started
 
 ### Prerequisites
@@ -144,13 +144,11 @@ Download the ZIP from GitHub and extract it, or clone it:
 git clone https://github.com/yourusername/dastyaab.git
 cd dastyaab
 ```
-
 **Step 2 — Install backend dependencies**
 ```bash
 cd backend
 npm install
 ```
-
 **Step 3 — Start MongoDB**
 
 Make sure MongoDB is running on your machine:
@@ -158,7 +156,67 @@ Make sure MongoDB is running on your machine:
 # Windows
 net start MongoDB
 ```
-
 **Step 4 — Start the backend server**
 ```bash
 node server.js
+```
+## Roadmap
+
+### Sprint 1 — Core MVP ✅ Complete
+- [x] User registration and login
+- [x] Provider profile creation
+- [x] Service provider search with dynamic results
+- [x] Responsive frontend — 5 fully designed pages
+- [x] Separated CSS architecture with shared design system
+- [x] MongoDB database integration
+
+### Sprint 2 — Security 🔄 Upcoming
+- [ ] Password hashing with bcrypt
+- [ ] JWT authentication tokens
+- [ ] Protected API routes middleware
+- [ ] Logout with token clearing
+
+### Sprint 3 — User Experience
+- [ ] User dashboard after login
+- [ ] Individual provider detail page
+- [ ] Toast notifications
+- [ ] Mobile hamburger menu
+- [ ] Real-time form validation
+
+### Sprint 4 — Advanced Features
+- [ ] Ratings and reviews system
+- [ ] Provider edit and delete listing
+- [ ] Search filters by location, experience, rating
+- [ ] Pagination for search results
+- [ ] Profile photo upload
+
+### Sprint 5 — Deployment
+- [ ] Environment variables with .env
+- [ ] Deploy backend to Render
+- [ ] Deploy frontend to Netlify
+- [ ] Production testing across devices
+
+---
+
+## Author
+
+**Haris Ahmed Khan**
+BS Data Science — 4th Semester
+FAST-NUCES Islamabad
+
+[![GitHub](https://img.shields.io/badge/GitHub-yourusername-181717?style=flat&logo=github)](https://github.com/HarisAhmed786)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Haris_Ahmed_Khan-0A66C2?style=flat&logo=linkedin)](https://www.linkedin.com/in/haris-ahmed-khan313)
+
+---
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+
+Made with ❤️ in Pakistan &nbsp;·&nbsp; Dastyaab © 2025
+
+</div>
