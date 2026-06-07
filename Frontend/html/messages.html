@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Messages — Dastyaab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <link rel="stylesheet" href="css/style.css"/>
+   <link rel="stylesheet" href="css/messages.css"/>
+   <script src="js/socket.js"></script>
+  
+</head>
+<body>
+
+<!-- Top Nav -->
+<nav class="top-nav">
+  <a class="nav-logo" href="index.html">Dasty<span>aab</span></a>
+  <span class="nav-title">Messages</span>
+  <ul class="nav-links">
+  <li><a href="dashboard.html">Dashboard</a></li>
+  
+   </ul>
+  <div class="nav-spacer"></div>
+  <div class="nav-user">
+    <span id="nav-username" style="font-size:0.78rem;"></span>
+    <div class="nav-avatar" id="nav-avatar">?</div>
+  </div>
+</nav>
+
+<!-- Notification Toast -->
+<div class="notif-toast" id="notif-toast" onclick="handleToastClick()">
+  <div class="notif-toast-avatar" id="toast-avatar">?</div>
+  <div class="notif-toast-body">
+    <div class="notif-toast-name" id="toast-name"></div>
+    <div class="notif-toast-preview" id="toast-preview"></div>
+  </div>
+  <button class="notif-close" onclick="event.stopPropagation(); hideToast()">✕</button>
+</div>
+
+<!-- Image fullscreen preview -->
+<div class="img-preview-overlay" id="img-preview-overlay">
+  <button onclick="closeImagePreview()">✕</button>
+  <img id="img-preview-src" src="" alt="Preview" />
+</div>
+
+<!-- Inbox Layout -->
+<div class="inbox-layout">
+
+  <!-- ── SIDEBAR ── -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1>Inbox</h1>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search conversations…" oninput="filterConversations()" />
+      </div>
+    </div>
+
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
+      <button class="filter-tab" onclick="setFilter('unread', this)">Unread</button>
+      <button class="filter-tab" onclick="setFilter('open', this)">Open</button>
+      <button class="filter-tab" onclick="setFilter('closed', this)">Closed</button>
+    </div>
+
+    <div class="conv-list" id="conv-list">
+      <div class="chat-loading" style="margin-top:40px;">
+        <div class="spinner"></div>
+        <span>Loading conversations…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CHAT PANEL ── -->
+  <div class="chat-panel" id="chat-panel">
+
+    <!-- Welcome screen -->
+    <div class="chat-welcome" id="chat-welcome">
+      <div class="big-icon">💬</div>
+      <h2>Your Messages</h2>
+      <p>Select a conversation from the left to start chatting with customers or service providers.</p>
+    </div>
+
+    <!-- Active chat (hidden until conversation selected) -->
+    <div id="active-chat" style="display:none; flex:1; flex-direction:column; overflow:hidden;">
+
+      <!-- Chat header -->
+      <div class="chat-header">
+        <button class="mobile-back-btn" onclick="showSidebar()">←</button>
+        <div class="chat-header-avatar" id="active-avatar">??</div>
+        <div class="chat-header-info">
+          <div class="chat-header-name" id="active-name">—</div>
+          <div class="chat-header-sub" id="active-sub">—</div>
+        </div>
+        <div class="chat-header-status">
+          <div class="status-dot" id="active-status-dot"></div>
+          <span id="active-status-text">Connecting…</span>
+        </div>
+      </div>
+
+      <!-- Closed banner -->
+      <div class="chat-closed-banner" id="chat-closed-banner">
+        🔒 This chat is closed. Chats are available up to 48 hours after booking completion.
+      </div>
+
+      <!-- Messages -->
+      <div class="chat-messages" id="chat-messages"></div>
+
+      <!-- Typing -->
+      <div class="typing-indicator" id="typing-indicator"></div>
+
+      <!-- Input -->
+      <div class="chat-input-area" id="chat-input-area">
+        <div class="char-counter-row">
+          <span class="char-counter" id="char-counter">0 / 1000</span>
+        </div>
+        <div class="chat-input-row">
+          <input type="file" id="image-input" accept=".jpg,.jpeg,.png" onchange="handleImageUpload(event)" />
+          <button class="btn-image" id="btn-image" onclick="document.getElementById('image-input').click()" title="Send image">🖼</button>
+          <textarea
+            id="chat-input"
+            class="chat-textarea"
+            placeholder="Type a message… (Enter to send)"
+            rows="1"
+            maxlength="1000"
+            oninput="handleInput()"
+            onkeydown="handleKeyDown(event)"
+          ></textarea>
+          <button class="btn-send" id="send-btn" onclick="sendMessage()" title="Send">➤</button>
+        </div>
+      </div>
+
+    </div><!-- end #active-chat -->
+
+  </div><!-- end .chat-panel -->
+
+</div><!-- end .inbox-layout -->
+
+
+<script>
+/* ================================================================
+   DASTYAAB MESSAGES INBOX
+   Connects to existing Socket.io + MongoDB backend
+================================================================ */
+
+const API    = "http://localhost:5000/api";
+const SOCKET = "http://localhost:5000";
+
+/* ── Session ── */
+const ME_ID   = localStorage.getItem("userId");
+const ME_NAME = localStorage.getItem("userName");
+const ME_ROLE = localStorage.getItem("userRole");
+
+if (!ME_ID) { window.location.href = "login.html"; }
+
+/* ── State ── */
+let socket         = null;
+let allConvs       = [];       // All conversation objects
+let activeBookingId = null;    // Currently open chat
+let chatOpen       = false;    // Whether active chat accepts input
+let typingTimer    = null;
+let isTyping       = false;
+let lastDate       = null;
+let toastTimer     = null;
+let currentFilter  = "all";
+let pendingToast   = null;     // { bookingId, senderName } for click-to-open
+
+/* ── Nav ── */
+document.getElementById("nav-username").textContent = ME_NAME || "";
+const navInitials = (ME_NAME || "?").split(" ").map(w => w[0]).join("").toUpperCase().slice(0,2);
+document.getElementById("nav-avatar").textContent = navInitials;
+
+/* ================================================================
+   BOOT
+================================================================ */
+window.addEventListener("load", async () => {
+  await loadConversations();
+  initSocket();
+  // Auto-open bookingId from URL if provided (e.g., from notification click)
+  const params = new URLSearchParams(window.location.search);
+  const urlBookingId = params.get("bookingId");
+  if (urlBookingId) openChat(urlBookingId);
+});
+
+/* ================================================================
+   LOAD CONVERSATIONS SIDEBAR
+================================================================ */
+async function loadConversations() {
+  try {
+    const res  = await fetch(`${API}/chat/conversations/${ME_ID}?role=${ME_ROLE}`);
+    const data = await res.json();
+    allConvs = data;
+    renderConvList(allConvs);
+  } catch (err) {
+    document.getElementById("conv-list").innerHTML =
+      `<div class="sidebar-empty"><div class="icon">⚠️</div><p>Could not load conversations.</p></div>`;
+  }
+}
+
+function renderConvList(convs) {
+  const list = document.getElementById("conv-list");
+  const query = document.getElementById("search-input").value.toLowerCase();
+
+  let filtered = convs.filter(c => {
+    if (currentFilter === "unread" && !c.unreadCount) return false;
+    if (currentFilter === "open"   && !c.canChat)     return false;
+    if (currentFilter === "closed" && c.canChat)      return false;
+    if (query && !c.partnerName.toLowerCase().includes(query) &&
+        !(c.serviceType||"").toLowerCase().includes(query)) return false;
+    return true;
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="sidebar-empty">
+      <div class="icon">💬</div>
+      <p>No conversations found.</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(c => buildConvHTML(c)).join("");
+}
+
+function buildConvHTML(c) {
+  const initials  = (c.partnerName||"?").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+  const roleClass = c.partnerRole === "provider" ? "provider" : "customer";
+  const isActive  = c.bookingId === activeBookingId;
+  const hasUnread = c.unreadCount > 0;
+  const timeStr   = formatTime(c.lastMessageAt);
+  const preview   = c.lastMessage
+    ? (c.lastMessageType === "image" ? "📷 Image" : escHtml(c.lastMessage.slice(0,60)))
+    : "No messages yet";
+  const statusIcon = c.lastSenderId === ME_ID ? getStatusIcon(c.lastStatus) : "";
+
+  return `<div
+    class="conv-item ${isActive ? "active" : ""} ${hasUnread ? "unread" : ""}"
+    onclick="openChat('${c.bookingId}')"
+    data-booking="${c.bookingId}">
+    <div class="conv-avatar ${roleClass}">
+      ${initials}
+      <div class="online-dot" id="dot-${c.bookingId}"></div>
+    </div>
+    <div class="conv-body">
+      <div class="conv-top">
+        <span class="conv-name">${escHtml(c.partnerName)}</span>
+        <span class="conv-time">${timeStr}</span>
+      </div>
+      <div class="conv-bottom">
+        <span class="conv-preview">${statusIcon} ${preview}</span>
+        ${c.serviceType ? `<span class="conv-service-tag">${escHtml(c.serviceType)}</span>` : ""}
+        <span class="conv-badge ${hasUnread ? "show" : ""}" id="badge-${c.bookingId}">
+          ${c.unreadCount > 9 ? "9+" : c.unreadCount}
+        </span>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ================================================================
+   OPEN A CHAT
+================================================================ */
+async function openChat(bookingId) {
+  if (activeBookingId === bookingId) return;
+
+  // Leave old room
+  if (socket && activeBookingId) {
+    socket.emit("chat:leave", { bookingId: activeBookingId });
+  }
+
+  activeBookingId = bookingId;
+  lastDate = null;
+
+  // Update sidebar active state
+  document.querySelectorAll(".conv-item").forEach(el => {
+    el.classList.toggle("active", el.dataset.booking === bookingId);
+  });
+
+  // Show active chat panel, hide welcome
+  document.getElementById("chat-welcome").style.display  = "none";
+  const ac = document.getElementById("active-chat");
+  ac.style.display = "flex";
+
+  // Reset UI
+  document.getElementById("chat-messages").innerHTML =
+    `<div class="chat-loading"><div class="spinner"></div><span>Loading…</span></div>`;
+  document.getElementById("chat-closed-banner").classList.remove("show");
+  document.getElementById("typing-indicator").classList.remove("show");
+  resetInput(true);
+
+  // Mobile: hide sidebar
+  hideSidebar();
+
+  // Load data
+  await Promise.all([loadChatHeader(bookingId), loadMessages(bookingId)]);
+
+  // Join socket room
+  if (socket) {
+    socket.emit("chat:join", { bookingId, userId: ME_ID });
+    socket.emit("chat:read", { bookingId, userId: ME_ID });
+  }
+
+  // Clear unread badge in sidebar
+  clearBadge(bookingId);
+
+  // Update URL without reload
+  const url = new URL(window.location);
+  url.searchParams.set("bookingId", bookingId);
+  history.replaceState(null, "", url);
+}
+
+/* ================================================================
+   LOAD CHAT HEADER
+================================================================ */
+async function loadChatHeader(bookingId) {
+  try {
+    const res  = await fetch(`${API}/chat/access/${bookingId}`);
+    const data = await res.json();
+
+    if (data.booking) {
+      const b = data.booking;
+      const partnerName = ME_ROLE === "provider" ? b.customerName : (b.providerName || "Provider");
+      const initials = (partnerName||"?").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+
+      document.getElementById("active-name").textContent    = partnerName;
+      document.getElementById("active-sub").textContent     =
+        `${b.serviceType || "Service"} · ${b.date || ""} ${b.time || ""} · ${b.status || ""}`;
+      document.getElementById("active-avatar").textContent  = initials;
+    }
+
+    chatOpen = data.canChat !== false;
+    if (!chatOpen) {
+      document.getElementById("chat-closed-banner").classList.add("show");
+    }
+    resetInput(!chatOpen);
+
+  } catch { /* silent */ }
+}
+
+/* ================================================================
+   LOAD MESSAGE HISTORY
+================================================================ */
+async function loadMessages(bookingId) {
+  try {
+    const res      = await fetch(`${API}/chat/${bookingId}`);
+    const messages = await res.json();
+
+    const container = document.getElementById("chat-messages");
+
+    if (!messages.length) {
+      container.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;
+        justify-content:center;color:var(--text-muted);gap:8px;">
+        <div style="font-size:2rem;opacity:0.2;">💬</div>
+        <div style="font-size:0.82rem;">No messages yet. Say hello!</div>
+      </div>`;
+      return;
+    }
+
+    container.innerHTML = "";
+    lastDate = null;
+    messages.forEach(m => appendMessage(m, false));
+    scrollToBottom();
+
+  } catch {
+    document.getElementById("chat-messages").innerHTML =
+      `<div class="chat-loading" style="color:#f87171;">Failed to load messages.</div>`;
+  }
+}
+
+/* ================================================================
+   APPEND A SINGLE MESSAGE
+================================================================ */
+function appendMessage(msg, animate = true) {
+  const container = document.getElementById("chat-messages");
+
+  // Remove empty state if present
+  const emptyEl = container.querySelector("[data-empty]");
+  if (emptyEl) emptyEl.remove();
+
+  // Date separator
+  const msgDate = new Date(msg.createdAt).toDateString();
+  if (msgDate !== lastDate) {
+    lastDate = msgDate;
+    const sep = document.createElement("div");
+    sep.className = "date-separator";
+    sep.textContent = formatDateLabel(new Date(msg.createdAt));
+    container.appendChild(sep);
+  }
+
+  const isMine  = msg.senderId === ME_ID || msg.senderId?.toString() === ME_ID;
+  const timeStr = new Date(msg.createdAt).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+
+  const row = document.createElement("div");
+  row.className = `msg-row ${isMine ? "mine" : "theirs"}`;
+  if (!animate) row.style.animation = "none";
+
+  let content = "";
+  if (msg.type === "image" && msg.imageUrl) {
+    content = `<img class="msg-img" src="http://localhost:5000${msg.imageUrl}"
+      alt="Image" onclick="openImagePreview('http://localhost:5000${msg.imageUrl}')" />`;
+  } else {
+    content = `<span>${escHtml(msg.text || "")}</span>`;
+  }
+
+  const statusStr = isMine ? getStatusIcon(msg.status) : "";
+
+  row.innerHTML = `
+    <div class="msg-bubble">
+      ${content}
+      <div class="msg-meta">
+        <span>${timeStr}</span>
+        ${isMine ? `<span class="status-icon ${(msg.status||"Sent").toLowerCase()}">${statusStr}</span>` : ""}
+      </div>
+    </div>`;
+
+  container.appendChild(row);
+}
+
+/* ================================================================
+   SOCKET.IO
+================================================================ */
+function initSocket() {
+  socket = io(SOCKET);
+
+  socket.on("connect", () => {
+    socket.emit("user:online", { userId: ME_ID, userName: ME_NAME });
+    if (activeBookingId) {
+      socket.emit("chat:join", { bookingId: activeBookingId, userId: ME_ID });
+    }
+    setConnectionStatus(true);
+  });
+
+  socket.on("disconnect", () => setConnectionStatus(false));
+
+  socket.on("message:received", (msg) => {
+    if (msg.bookingId?.toString() === activeBookingId?.toString()) {
+      appendMessage(msg);
+      scrollToBottom();
+      socket.emit("chat:read", { bookingId: activeBookingId, userId: ME_ID });
+    }
+    // Update sidebar preview
+    updateConvPreview(msg);
+  });
+
+  socket.on("message:delivered", ({ bookingId }) => {
+    if (bookingId === activeBookingId) updateStatusIcons("delivered");
+  });
+  socket.on("message:read", ({ bookingId }) => {
+    if (bookingId === activeBookingId) updateStatusIcons("read");
+  });
+
+  socket.on("chat:typing", ({ senderName }) => {
+    const el = document.getElementById("typing-indicator");
+    el.textContent = `${senderName} is typing…`;
+    el.classList.add("show");
+  });
+  socket.on("chat:stop_typing", () => {
+    document.getElementById("typing-indicator").classList.remove("show");
+  });
+
+  /* Notification for messages in OTHER rooms */
+  socket.on("notification:new_message", ({ bookingId, senderName, preview }) => {
+    if (bookingId === activeBookingId) return; // already looking at it
+    showToast(bookingId, senderName, preview);
+    incrementBadge(bookingId);
+  });
+
+  socket.on("message:error", ({ error }) => alert("⚠️ " + error));
+}
+
+function setConnectionStatus(online) {
+  const dot  = document.getElementById("active-status-dot");
+  const text = document.getElementById("active-status-text");
+  if (!dot) return;
+  dot.className  = "status-dot" + (online ? " online" : "");
+  text.textContent = online ? "Connected" : "Reconnecting…";
+}
+
+/* ================================================================
+   SEND MESSAGE
+================================================================ */
+function sendMessage() {
+  const textarea = document.getElementById("chat-input");
+  const text     = textarea.value.trim();
+  if (!text || !chatOpen || !activeBookingId) return;
+  if (text.length > 1000) { alert("Message too long (max 1000 chars)."); return; }
+
+  socket.emit("message:send", {
+    bookingId:  activeBookingId,
+    senderId:   ME_ID,
+    senderName: ME_NAME,
+    senderRole: ME_ROLE,
+    text
+  });
+
+  textarea.value = "";
+  updateCharCounter();
+  stopTyping();
+  textarea.style.height = "auto";
+}
+
+/* ================================================================
+   IMAGE UPLOAD
+================================================================ */
+async function handleImageUpload(event) {
+  if (!chatOpen) return;
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!["image/jpeg","image/png"].includes(file.type)) { alert("Only JPG/PNG allowed."); return; }
+  if (file.size > 10*1024*1024) { alert("Max image size is 10MB."); return; }
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const res = await fetch(`${API}/chat/upload-image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          base64: e.target.result, filename: file.name,
+          bookingId: activeBookingId, senderId: ME_ID,
+          senderName: ME_NAME, senderRole: ME_ROLE
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        socket.emit("message:send", {
+          bookingId: activeBookingId, senderId: ME_ID,
+          senderName: ME_NAME, senderRole: ME_ROLE,
+          type: "image", imageUrl: data.imageUrl
+        });
+      } else { alert("Upload failed: " + (data.error||"Unknown")); }
+    } catch { alert("Cannot upload image."); }
+    event.target.value = "";
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ================================================================
+   INPUT HELPERS
+================================================================ */
+function handleInput() { updateCharCounter(); autoResize(); handleTyping(); }
+
+function updateCharCounter() {
+  const len = document.getElementById("chat-input").value.length;
+  const el  = document.getElementById("char-counter");
+  el.textContent = `${len} / 1000`;
+  el.className   = "char-counter" + (len>900?" danger":len>750?" warn":"");
+}
+
+function autoResize() {
+  const el = document.getElementById("chat-input");
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 120) + "px";
+}
+
+function handleKeyDown(e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function handleTyping() {
+  if (!isTyping && chatOpen) {
+    isTyping = true;
+    socket.emit("chat:typing", { bookingId: activeBookingId, senderName: ME_NAME });
+  }
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(stopTyping, 1500);
+}
+
+function stopTyping() {
+  if (isTyping) {
+    isTyping = false;
+    if (socket && activeBookingId) socket.emit("chat:stop_typing", { bookingId: activeBookingId });
+  }
+}
+
+function resetInput(disabled = false) {
+  const ta = document.getElementById("chat-input");
+  const sb = document.getElementById("send-btn");
+  const bi = document.getElementById("btn-image");
+  if (!ta) return;
+  ta.disabled = disabled;
+  sb.disabled = disabled;
+  bi.disabled = disabled;
+  ta.placeholder = disabled ? "This chat is closed." : "Type a message… (Enter to send)";
+}
+
+/* ================================================================
+   SIDEBAR HELPERS
+================================================================ */
+function clearBadge(bookingId) {
+  const badge = document.getElementById(`badge-${bookingId}`);
+  if (badge) { badge.textContent = ""; badge.classList.remove("show"); }
+  const conv = allConvs.find(c => c.bookingId === bookingId);
+  if (conv) conv.unreadCount = 0;
+}
+
+function incrementBadge(bookingId) {
+  const badge = document.getElementById(`badge-${bookingId}`);
+  if (!badge) { loadConversations(); return; }
+  const conv = allConvs.find(c => c.bookingId === bookingId);
+  if (conv) conv.unreadCount = (conv.unreadCount || 0) + 1;
+  const count = conv?.unreadCount || 1;
+  badge.textContent = count > 9 ? "9+" : count;
+  badge.classList.add("show");
+  // Move conversation to top
+  if (conv) {
+    allConvs = [conv, ...allConvs.filter(c => c.bookingId !== bookingId)];
+    renderConvList(allConvs);
+  }
+}
+
+function updateConvPreview(msg) {
+  const conv = allConvs.find(c => c.bookingId === msg.bookingId?.toString());
+  if (!conv) return;
+  conv.lastMessage    = msg.type === "image" ? "📷 Image" : msg.text;
+  conv.lastMessageAt  = msg.createdAt;
+  conv.lastStatus     = msg.status;
+  conv.lastSenderId   = msg.senderId;
+  conv.lastMessageType = msg.type;
+  renderConvList(allConvs);
+}
+
+function updateStatusIcons(newStatus) {
+  document.querySelectorAll(".status-icon").forEach(el => {
+    el.className   = `status-icon ${newStatus}`;
+    el.textContent = getStatusIcon(newStatus === "delivered" ? "Delivered" : "Read");
+  });
+}
+
+function filterConversations() { renderConvList(allConvs); }
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll(".filter-tab").forEach(t => t.classList.remove("active"));
+  btn.classList.add("active");
+  renderConvList(allConvs);
+}
+
+/* ================================================================
+   NOTIFICATION TOAST
+================================================================ */
+function showToast(bookingId, senderName, preview) {
+  pendingToast = { bookingId, senderName };
+  const initials = (senderName||"?").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+  document.getElementById("toast-avatar").textContent  = initials;
+  document.getElementById("toast-name").textContent    = senderName;
+  document.getElementById("toast-preview").textContent = preview;
+  document.getElementById("notif-toast").classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 5000);
+}
+
+function hideToast() {
+  document.getElementById("notif-toast").classList.remove("show");
+}
+
+function handleToastClick() {
+  if (pendingToast) {
+    openChat(pendingToast.bookingId);
+    hideToast();
+  }
+}
+
+/* ================================================================
+   MOBILE
+================================================================ */
+function hideSidebar() {
+  if (window.innerWidth <= 700) {
+    document.getElementById("sidebar").classList.add("hidden");
+    document.getElementById("chat-panel").classList.remove("hidden");
+  }
+}
+function showSidebar() {
+  document.getElementById("sidebar").classList.remove("hidden");
+  document.getElementById("chat-panel").classList.add("hidden");
+}
+
+/* ================================================================
+   IMAGE PREVIEW
+================================================================ */
+function openImagePreview(src) {
+  document.getElementById("img-preview-src").src = src;
+  document.getElementById("img-preview-overlay").classList.add("show");
+}
+function closeImagePreview() {
+  document.getElementById("img-preview-overlay").classList.remove("show");
+}
+document.getElementById("img-preview-overlay").addEventListener("click", function(e) {
+  if (e.target === this) closeImagePreview();
+});
+
+/* ================================================================
+   UTILITY
+================================================================ */
+function scrollToBottom() {
+  const c = document.getElementById("chat-messages");
+  c.scrollTop = c.scrollHeight;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function getStatusIcon(status) {
+  if (status === "Read")      return "✓✓";
+  if (status === "Delivered") return "✓✓";
+  return "✓";
+}
+
+function formatTime(dateStr) {
+  if (!dateStr) return "";
+  const d    = new Date(dateStr);
+  const now  = new Date();
+  const diff = (now - d) / 1000;
+  if (diff < 60)           return "now";
+  if (diff < 3600)         return Math.floor(diff/60) + "m";
+  if (diff < 86400)        return d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+  if (diff < 604800)       return d.toLocaleDateString([],{weekday:"short"});
+  return d.toLocaleDateString([],{month:"short",day:"numeric"});
+}
+
+function formatDateLabel(d) {
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) return "Today";
+  const yest = new Date(now); yest.setDate(yest.getDate()-1);
+  if (d.toDateString() === yest.toDateString()) return "Yesterday";
+  return d.toLocaleDateString([],{weekday:"long",month:"long",day:"numeric"});
+}
+
+window.addEventListener("beforeunload", () => {
+  if (socket && activeBookingId) socket.emit("chat:leave", { bookingId: activeBookingId });
+});
+</script>
+   <script src="js/socket.js"></script>
+</body>
+</html>

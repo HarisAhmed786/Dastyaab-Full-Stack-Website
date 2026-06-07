@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — Dastyaab</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+
+</head>
+<body>
+
+  
+
+  <div class="dashboard-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo" style="margin-bottom:2rem;">Dasty<span>aab</span></div>
+      <nav>
+        <a href="#bookings" >📅 Costumer Bookings</a>
+        <a href="messages.html"> 📩 Inbox</a>
+        <a href="profile.html">👤 My Profile</a>
+        <a href="index.html">🏠 Home</a>
+        <a href="#" onclick="logout()" class="logout">🚪Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <header class="main-header">
+        <div>
+          <h1>Service Requests</h1>
+          <p style="color:var(--muted);font-size:0.88rem;margin-top:0.2rem;" id="role-label"></p>
+        </div>
+        <div class="user-info">Welcome, <strong id="provider-name">...</strong></div>
+      </header>
+
+      <!-- Stats -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <h3>Pending</h3>
+          <p id="count-pending">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Accepted</h3>
+          <p id="count-accepted">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Completed</h3>
+          <p id="count-completed">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Total Jobs</h3>
+          <p id="count-total">0</p>
+        </div>
+      </section>
+
+      <!-- Bookings List -->
+      <section class="booking-section" id="bookings">
+        <h2>Recent Requests</h2>
+        <div id="booking-list" class="booking-list">
+          <div class="loading"><div class="spinner"></div>Fetching your requests…</div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+<div id="quick-reply-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+    <div class="quick-reply-box" style="background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+        <h3 id="reply-to-name" style="margin-top: 0; color: #333;">Reply to Message</h3>
+        <textarea id="quick-reply-text" placeholder="Write your message here..." style="width: 100%; height: 120px; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; resize: none; font-family: inherit;"></textarea>
+        <div style="display: flex; gap: 10px;">
+            <button id="send-quick-reply" style="background: #d86b3d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; flex: 2;">Send Message</button>
+            <button onclick="closeQuickReply()" style="background: #eee; color: #555; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; flex: 1;">Cancel</button>
+        </div>
+    </div>
+</div>
+  <script>
+    /* ── Login protection — redirect if not logged in ── */
+    const PROVIDER_ID   = localStorage.getItem("userId");
+    const PROVIDER_NAME = localStorage.getItem("userName");
+    const USER_ROLE     = localStorage.getItem("userRole");
+
+    if (!PROVIDER_ID) {
+      alert("Please login to access your dashboard.");
+      window.location.href = "login.html";
+    }
+
+    /* ── Fill welcome header ── */
+    document.getElementById("provider-name").textContent = PROVIDER_NAME || "User";
+    document.getElementById("role-label").textContent =
+      USER_ROLE === "provider" ? "Provider Dashboard" : "Customer Dashboard";
+
+    /* ── Logout ── */
+    function logout() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+
+    /* ── Fetch bookings for this provider ── */
+    async function fetchBookings() {
+      try {
+        const res      = await fetch(`http://localhost:5000/api/provider-bookings/${PROVIDER_ID}`);
+        const bookings = await res.json();
+        renderBookings(bookings);
+      } catch {
+        document.getElementById("booking-list").innerHTML =
+          "<p style='color:var(--muted);'>Error loading bookings. Is the server running?</p>";
+      }
+    }
+
+    /* ── Render booking cards ── */
+    function renderBookings(bookings) {
+      const list = document.getElementById("booking-list");
+
+      /* Update stat counters */
+      document.getElementById("count-pending").textContent   = bookings.filter(b => b.status === "Pending").length;
+      document.getElementById("count-accepted").textContent  = bookings.filter(b => b.status === "Accepted").length;
+      document.getElementById("count-completed").textContent = bookings.filter(b => b.status === "Completed").length;
+      document.getElementById("count-total").textContent     = bookings.length;
+
+      if (!bookings.length) {
+        list.innerHTML = "<p style='color:var(--muted);'>No booking requests yet.</p>";
+        return;
+      }
+list.innerHTML = bookings.map(b => `
+  <div class="booking-card ${b.status.toLowerCase()}">
+    <div class="booking-info">
+      <h3>${b.customerName} ${b.isEmergency ? '<span style="color:var(--rust);font-size:0.8rem;">🚨 EMERGENCY</span>' : ""}</h3>
+      <p><strong>Service:</strong> ${b.serviceType || "—"}</p>
+      <p><strong>Date:</strong> ${b.date} &nbsp;|&nbsp; <strong>Time:</strong> ${b.time}</p>
+      <p><strong>Priority:</strong> ${b.priorityLevel || "Normal"}</p>
+      <span class="status-badge status-${b.status.toLowerCase()}">${b.status}</span>
+    </div>
+    
+    <div class="booking-actions">
+      <button onclick="window.location.href='messages.html?bookingId=${b._id}'" class="btn-chat">
+        💬 Message
+      </button>
+
+      ${b.status === "Pending" ? `
+        <button onclick="updateStatus('${b._id}', 'Accepted')"  class="btn-accept">✓ Accept</button>
+        <button onclick="updateStatus('${b._id}', 'Rejected')"  class="btn-reject">✗ Reject</button>
+      ` : b.status === "Accepted" ? `
+        <button onclick="updateStatus('${b._id}', 'Completed')" class="btn-accept">✅ Mark Complete</button>
+      ` : `
+        <p class="done-text">Action Completed</p>
+      `}
+    </div>
+  </div>
+`).join("");
+    }
+
+
+    async function updateStatus(id, newStatus) {
+      try {
+        await fetch(`http://localhost:5000/api/bookings/${id}`, {
+          method:  "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ status: newStatus })
+        });
+        fetchBookings(); 
+      } catch {
+        alert("Error updating booking status.");
+      }
+    }
+
+    /* ── Load on page ready ── */
+    window.onload = fetchBookings;
+  </script>
+    <script src="../js/socket.js"></script>
+
+</body>
+</html>

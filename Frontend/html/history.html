@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Bookings — Dastyaab</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+  <div class="dashboard-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo" style="margin-bottom:2rem;">Dasty<span>aab</span></div>
+      <nav>
+        <a href="history.html" class="active">📋 My Bookings</a>
+        <a href="messages.html"> 📩 Inbox</a>
+        <a href="search.html">🔍 Find Providers</a>
+          <a href="index.html">🏠 Home</a>
+         
+        
+        <a href="#" onclick="logout()" class="logout">🚪Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <header class="main-header">
+        <div>
+          <h1>My Booking History</h1>
+          <p style="color:var(--muted);font-size:0.88rem;margin-top:0.2rem;">All your Requested Services in one place</p>
+        </div>
+        <div class="user-info">Welcome, <strong id="user-name">...</strong></div>
+      </header>
+
+      <!-- Stats -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <h3>Pending</h3>
+          <p id="count-pending">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Accepted</h3>
+          <p id="count-accepted">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Completed</h3>
+          <p id="count-completed">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Total</h3>
+          <p id="count-total">0</p>
+        </div>
+      </section>
+
+      <!-- Filter Tabs -->
+      <div style="display:flex;gap:0.8rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+        <button class="filter-tab active" onclick="filterBookings('All')">All</button>
+        <button class="filter-tab" onclick="filterBookings('Pending')">Pending</button>
+        <button class="filter-tab" onclick="filterBookings('Accepted')">Accepted</button>
+        <button class="filter-tab" onclick="filterBookings('Completed')">Completed</button>
+        <button class="filter-tab" onclick="filterBookings('Rejected')">Rejected</button>
+      </div>
+
+      <!-- Booking List -->
+      <section class="booking-section">
+        <div id="booking-list" class="booking-list">
+          <div class="loading"><div class="spinner"></div>Loading your bookings…</div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+
+
+  <style>
+    .filter-tab {
+      padding: 0.45rem 1.1rem;
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      background: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--muted);
+    }
+    .filter-tab:hover,
+    .filter-tab.active {
+      background: var(--rust);
+      border-color: var(--rust);
+      color: var(--white);
+    }
+    .status-pending   { background: #fff4e0; color: #9a6800; }
+    .status-accepted  { background: #e8f5e9; color: #1b5e20; }
+    .status-completed { background: #e3f2fd; color: #0d47a1; }
+    .status-rejected  { background: #fde8e4; color: var(--error-fg); }
+  </style>
+
+
+<div id="quick-reply-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+    <div class="quick-reply-box" style="background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+        <h3 id="reply-to-name" style="margin-top: 0; color: #333;">Reply to Message</h3>
+        <textarea id="quick-reply-text" placeholder="Write your message here..." style="width: 100%; height: 120px; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; resize: none; font-family: inherit;"></textarea>
+        <div style="display: flex; gap: 10px;">
+            <button id="send-quick-reply" style="background: #d86b3d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; flex: 2;">Send Message</button>
+            <button onclick="closeQuickReply()" style="background: #eee; color: #555; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; flex: 1;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+  <script>
+    /* ── Login protection ── */
+    const USER_ID   = localStorage.getItem("userId");
+    const USER_NAME = localStorage.getItem("userName");
+
+    if (!USER_ID) {
+      alert("Please login to view your bookings.");
+      window.location.href = "login.html";
+    }
+
+    document.getElementById("user-name").textContent = USER_NAME || "User";
+
+    /* ── State ── */
+    let allBookings = [];
+
+    /* ── Logout ── */
+    function logout() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+
+    /* ── Fetch customer bookings ── */
+    async function fetchMyBookings() {
+      try {
+        const res = await fetch(`http://localhost:5000/api/my-bookings/${USER_ID}`);
+        allBookings = await res.json();
+        updateStats(allBookings);
+        renderBookings(allBookings);
+      } catch {
+        document.getElementById("booking-list").innerHTML =
+          "<p style='color:var(--muted);'>Error loading bookings. Is the server running?</p>";
+      }
+    }
+
+    /* ── Update stat counters ── */
+    function updateStats(bookings) {
+      document.getElementById("count-pending").textContent   = bookings.filter(b => b.status === "Pending").length;
+      document.getElementById("count-accepted").textContent  = bookings.filter(b => b.status === "Accepted").length;
+      document.getElementById("count-completed").textContent = bookings.filter(b => b.status === "Completed").length;
+      document.getElementById("count-total").textContent     = bookings.length;
+    }
+
+    /* ── Filter by status ── */
+    function filterBookings(status) {
+      /* Update active tab */
+      document.querySelectorAll(".filter-tab").forEach(t => {
+        t.classList.toggle("active", t.textContent === status);
+      });
+
+      const filtered = status === "All"
+        ? allBookings
+        : allBookings.filter(b => b.status === status);
+
+      renderBookings(filtered);
+    }
+
+    /* ── Render booking cards ── */
+    function renderBookings(bookings) {
+      const list = document.getElementById("booking-list");
+
+      if (!bookings.length) {
+        list.innerHTML = `<p style='color:var(--muted);padding:2rem 0;'>No bookings found.</p>`;
+        return;
+      }
+
+      list.innerHTML = bookings.map(b => `
+        <div class="booking-card ${b.status.toLowerCase()}">
+          <div class="booking-info">
+            <h3>
+              ${b.providerName || "Provider"}
+              ${b.isEmergency ? '<span style="color:var(--rust);font-size:0.8rem;">🚨 EMERGENCY</span>' : ""}
+            </h3>
+            <p><strong>Service:</strong> ${b.serviceType || "—"}</p>
+            <p><strong>Date:</strong> ${b.date} &nbsp;|&nbsp; <strong>Time:</strong> ${b.time}</p>
+            <p><strong>Priority:</strong> ${b.priorityLevel || "Normal"}</p>
+            <span class="status-badge status-${b.status.toLowerCase()}">${b.status}</span>
+          </div>
+          <div class="booking-actions">
+             <button onclick="window.location.href='messages.html?bookingId=${b._id}'" class="btn-chat">💬 Message </button>
+            ${b.status === "Completed"
+              ? `<a href="search.html" class="btn-accept" style="text-decoration:none;text-align:center;">🔍 Book Again</a>`
+              : `<p class="done-text">${b.status === "Pending" ? "Awaiting confirmation" : b.status}</p>`
+            }
+
+          </div>
+        </div>
+      `).join("");
+    }
+
+    window.onload = fetchMyBookings;
+  </script>
+   <script src="../js/socket.js"></script>
+
+
+</body>
+</html>

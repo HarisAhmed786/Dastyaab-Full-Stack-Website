@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile — Dastyaab</title>
+  <link rel="stylesheet" href="css/profile.css" />
+  <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+</head>
+<body class="bg-light">
+
+  <nav>
+  <div class="nav-container">
+    <a href="index.html" class="logo">Dasty<span>aab</span></a>
+    <ul class="nav-links">
+
+      <li><a href="index.html">Home</a></li>
+      <li><a href="DashBoards.html" id="nav-dashboard">Dashboard</a></li>
+      <li><a href="messages.html">Inbox</a></li>
+      <li><a href="profile.html">My Profile</a></li>
+
+    </ul>
+  </div>
+</nav>
+
+  <div class="profile-container">
+  <aside class="profile-sidebar">
+    <div class="card profile-card text-center">
+      <div class="avatar-wrapper">
+        <img src="" alt="Profile" id="profile-display-img">
+        <label for="avatar-upload" class="edit-avatar-btn">📷</label>
+        <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+      </div>
+      <h2 class="provider-name" id="display-name">Loading...</h2>
+      <p class="provider-service" id="display-service">---</p>
+      
+      <div class="rating-overview">
+        <div class="stars" id="display-stars">☆☆☆☆☆</div>
+        <span class="rating-score" id="display-avg-rating">0.0</span>
+        <span class="review-count" id="display-review-count">(0 Reviews)</span>
+      </div>
+
+      <hr class="divider">
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <span class="stat-num" id="display-jobs">0</span>
+          <span class="stat-label">Jobs Done</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" id="display-response">--</span>
+          <span class="stat-label">Response</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="profile-main">
+    <div class="card settings-card">
+      <div class="card-header">
+        <h3>Profile Settings</h3>
+        <p>Your changes will be visible to customers immediately.</p>
+      </div>
+
+      <form id="profile-form">
+        <h4 class="section-title">Basic Information</h4>
+        <div class="form-row">
+          <div class="field">
+            <label>Full Name</label>
+            <input type="text" id="form-name" required>
+          </div>
+          <div class="field">
+            <label>Service Type</label>
+            <select id="form-service">
+              <option value="Electrician">Electrician</option>
+              <option value="Plumber">Plumber</option>
+              <option value="Carpenter">Carpenter</option>
+              <option value="Painter">Painter</option>
+              <option value="AC Technician">AC Technician</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Contact Number</label>
+            <input type="tel" id="form-contact" required>
+          </div>
+          <div class="field">
+            <label>Price (PKR / Job)</label>
+            <input type="number" id="form-price" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Short Bio</label>
+          <textarea id="form-bio" rows="4"></textarea>
+        </div>
+
+        <hr class="divider">
+
+        <h4 class="section-title">Availability</h4>
+        <div class="availability-grid" id="day-selector">
+          <label class="day-checkbox"><input type="checkbox" value="Mon"> <span>Mon</span></label>
+          <label class="day-checkbox"><input type="checkbox" value="Tue"> <span>Tue</span></label>
+          <label class="day-checkbox"><input type="checkbox" value="Wed"> <span>Wed</span></label>
+          <label class="day-checkbox"><input type="checkbox" value="Thu"> <span>Thu</span></label>
+          <label class="day-checkbox"><input type="checkbox" value="Fri"> <span>Fri</span></label>
+          <label class="day-checkbox"><input type="checkbox" value="Sat"> <span>Sat</span></label>
+          <label class="day-checkbox"><input type="checkbox" value="Sun"> <span>Sun</span></label>
+        </div>
+
+        <div class="form-actions" style="margin-top: 30px;">
+          <button type="submit" class="btn-primary" id="save-btn" style="width: 100%;">Update My Profile</button>
+        </div>
+      </form>
+
+    </div>
+
+  </main>
+  <div class="card reviews-card" style="margin-top: 20px;">
+    <div class="card-header">
+        <h3>Customer Reviews</h3>
+    </div>
+    <div id="profile-reviews-list" class="reviews-list">
+        <p style="padding: 20px; color: #666;">Loading reviews...</p>
+    </div>
+</div>
+</div>
+
+    <script src="../js/socket.js"></script>
+    <script src="../js/profile.js"></script>
+    <script src="../js/main.js"></script>
+
+</body>
+</html>
