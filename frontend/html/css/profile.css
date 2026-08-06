@@ -1,0 +1,266 @@
+/* 1. BRAND COLORS & VARIABLES */
+:root {
+  --ink:        #0d0d0d;   /* Primary dark / text color */
+  --cream:      #f5f0e8;   /* Page background */
+  --rust:       #c84b2f;   /* Primary accent */
+  --rust-dark:  #b03f25;   /* Rust hover */
+  --gold:       #d4a843;   /* Secondary accent */
+  --muted:      #6b6560;   /* Subtle text */
+  --border:     #e2ddd6;   /* Borders and dividers */
+  --white:      #ffffff;   /* Card and input backgrounds */
+}
+
+/* 2. GLOBAL RESET */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background-color: var(--cream);
+  color: var(--ink);
+  font-family: 'Playfair Display', serif;
+  line-height: 1.6;
+}
+
+/* ── Navigation Styling ── */
+nav {
+   background: rgba(245, 240, 232, 0.88);
+  padding: 1rem 5%;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.02);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+/* ── Logo ── */
+.logo {
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-decoration: none;
+  color: #1a1a1a; /* Ink color */
+  letter-spacing: -1px;
+}
+
+.logo span {
+  color: #d86b3d; /* Your brand orange/rust */
+}
+
+/* ── Nav Links ── */
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.nav-links li a {
+  text-decoration: none;
+  color: #666;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+/* Hover & Active State (The Underline Effect) */
+.nav-links li a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #d86b3d; /* Rust */
+  transition: width 0.3s ease;
+}
+
+.nav-links li a:hover {
+  color: #d86b3d;
+}
+
+.nav-links li a:hover::after,
+.nav-links li a.active::after {
+  width: 100%;
+}
+
+.nav-links li a.active {
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
+
+@media (max-width: 768px) {
+  .nav-links {
+    gap: 1.2rem;
+  }
+  
+  .nav-links li a {
+    font-size: 0.85rem;
+  }
+  
+  .logo {
+    font-size: 1.3rem;
+  }
+}
+
+.profile-container {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 320px 1fr; 
+  gap: 25px; 
+  align-items: start;
+}
+
+
+.profile-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; 
+}
+
+/* 6. CARD STYLING */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(13, 13, 13, 0.03);
+}
+
+.text-center { text-align: center; }
+
+.avatar-wrapper {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 15px;
+}
+
+.avatar-wrapper img {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--white);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.edit-avatar-btn {
+  position: absolute; bottom: 5px; right: 5px;
+  background: var(--rust);
+  color: var(--white);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  border: none;
+}
+
+.provider-name { font-size: 1.4rem; color: var(--ink); margin-bottom: 5px; }
+.provider-service { color: var(--rust); font-weight: 600; margin-bottom: 15px; }
+
+.stars { color: var(--gold); font-size: 1.2rem; }
+.rating-score { font-size: 1.5rem; font-weight: bold; }
+.review-count { font-size: 0.85rem; color: var(--muted); }
+
+.divider { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
+
+.stat-num { font-size: 1.2rem; font-weight: bold; color: var(--rust); display: block; }
+.stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+
+.reviews-list {
+  max-height: 400px;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.review-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.review-item:last-child { border-bottom: none; }
+.review-item strong { display: block; font-size: 0.9rem; color: var(--ink); }
+.review-item p { font-size: 0.85rem; color: var(--muted); line-height: 1.4; }
+
+.section-title {
+  font-size: 1.1rem;
+  color: var(--ink);
+  margin-bottom: 20px;
+  border-left: 4px solid var(--rust);
+  padding-left: 12px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.field { margin-bottom: 15px; }
+.field label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--white);
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.field input:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--rust);
+  box-shadow: 0 0 0 3px rgba(200, 75, 47, 0.1);
+}
+
+
+.availability-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.day-checkbox input { display: none; }
+.day-checkbox span {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.day-checkbox input:checked + span {
+  background: var(--rust);
+  color: var(--white);
+  border-color: var(--rust);
+}
+
+/* 11. BUTTON */
+.btn-primary {
+  background: var(--rust);
+  color: var(--white);
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  background: var(--rust-dark);
+}
+
+@media (max-width: 900px) {
+  .profile-container { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+}

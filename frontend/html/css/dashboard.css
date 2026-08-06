@@ -1,0 +1,220 @@
+/* 1. REUSE YOUR GLOBAL THEME VARIABLES */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --ink:         #0d0d0d;
+  --cream:       #f5f0e8;
+  --rust:        #c84b2f;
+  --rust-dark:   #b03f25;
+  --gold:        #d4a843;
+  --muted:       #6b6560;
+  --border:      #e2ddd6;
+  --white:       #ffffff;
+}
+
+/* 2. APPLY THE GLOBAL BACKGROUND & NOISE TEXTURE */
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  margin: 0;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.6;
+}
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+
+.sidebar {
+  width: 280px;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+}
+
+.sidebar .logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 900;
+  margin-bottom: 3rem;
+  text-decoration: none;
+  color: var(--white);
+}
+
+.sidebar .logo span { color: var(--rust); }
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebar nav a {
+  color: rgba(245, 240, 232, 0.6);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 20px 25px;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--white);
+}
+
+.logout { 
+  margin-top: auto; 
+  color: var(--rust) !important; 
+  font-weight: 600;
+}
+
+.main-content {
+  flex: 1;
+  padding: 3rem 4rem;
+  z-index: 1; 
+}
+
+.main-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-bottom: 0.5rem;
+}
+
+.user-info {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-bottom: 2.5rem;
+}
+
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: var(--white);
+  padding: 1.8rem;
+  border: 1px solid var(--border);
+  border-radius: 2px; 
+}
+
+.stat-card h3 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+.stat-card p {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+
+.booking-section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.booking-card {
+  background: var(--white);
+  padding: 2rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s;
+}
+
+.booking-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.booking-info h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.booking-info p {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 2px 0;
+}
+
+.status-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 12px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  margin-top: 10px;
+  display: inline-block;
+}
+
+
+.btn-accept {
+  background: var(--ink);
+  color: var(--white);
+  border: 2px solid var(--ink);
+  padding: 0.7rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-accept:hover {
+  background: var(--rust);
+  border-color: var(--rust);
+}
+
+.btn-reject {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 0.7rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 0.5rem;
+}
+
+.btn-reject:hover {
+  color: var(--rust);
+  border-color: var(--rust);
+}
+
+@media (max-width: 900px) {
+  .dashboard-container { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; padding: 1.5rem; }
+  .main-content { padding: 2rem; }
+}

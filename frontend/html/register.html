@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script src="../js/theme.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — Dastyaab</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/register.css" />
+</head>
+
+<body>
+  <nav>
+    <a href="index.html" class="logo">Dasty<span>aab</span></a>
+    <a href="index.html" class="nav-back">← Back to Home</a>
+  </nav>
+
+  <div class="auth-layout">
+    <div class="auth-panel">
+      <div class="form-tag">New Account</div>
+      <h1 class="form-title">Create Your Account</h1>
+      <p class="form-sub">Already have an account? <a href="login.html">Sign in here</a></p>
+
+      <div id="msg" class="msg"></div>
+
+      <div class="field">
+        <label>Join As</label>
+        <select id="role">
+          <option value="customer">Customer</option>
+          <option value="provider">Provider</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="name" placeholder="e.g. Ahmed Raza" />
+      </div>
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="you@example.com" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Create a strong password" />
+      </div>
+
+      <button class="btn-submit" onclick="register()">Create Account →</button>
+    </div>
+
+    <div class="auth-visual">
+      <div class="visual-tag">Join Dastyaab</div>
+      <h2 class="visual-title">Your Next Expert is<br><em>One Click Away</em></h2>
+      <p class="visual-desc">Join thousands of users who trust Dastyaab to connect with reliable local professionals
+        every day.</p>
+      <div class="benefit">
+        <div class="benefit-icon">✓</div>
+        <div class="benefit-text"><strong>Verified Professionals</strong>Every provider is reviewed and rated by real
+          customers.</div>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">⚡</div>
+        <div class="benefit-text"><strong>Fast Matching</strong>Find the right expert for your job in seconds.</div>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">🔒</div>
+        <div class="benefit-text"><strong>Safe & Secure</strong>Your data is protected. Always.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- JavaScript -->
+  <script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script>
+    async function register() {
+      const name = document.getElementById('name').value.trim();
+      const role = document.getElementById('role').value;
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('msg');
+      msg.className = 'msg'; msg.textContent = '';
+      function showMsg(text, type) {
+        const el = document.getElementById('msg');
+        el.textContent = text;
+        el.className = `msg ${type}`;
+      }
+      if (!name || !email || !password) {
+        showMsg('Please fill in all fields.', 'error');
+        return;
+      }
+
+      try {
+        const data = await window.api.post('/register', { name, email, password, role });
+        // Registration also returns a token now, so we can log the user
+        // straight in instead of making them log in again immediately after.
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("userId", data.user._id);
+        localStorage.setItem("userName", data.user.name);
+        localStorage.setItem("userRole", data.user.role);
+
+        showMsg('✓ Account created! Redirecting…', 'success');
+        setTimeout(() => {
+          window.location.href = data.user.role === 'provider' ? 'dashboard.html' : 'search.html';
+        }, 1500);
+      } catch (err) {
+        showMsg(err.message || 'Registration failed. Please try again.', 'error');
+      }
+    }
+    document.addEventListener('keydown', e => {if (e.key === 'Enter') register();});
+
+    async function upgradeToProvider(e) {
+  e.preventDefault();
+
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    showToast("Please login first!", "error");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const providerData = {
+    service: document.getElementById('service').value,
+    location: document.getElementById('location').value,
+    experience: document.getElementById('experience').value,
+    contact: document.getElementById('contact').value,
+    bio: document.getElementById('bio').value,
+    price: document.getElementById('price').value
+  };
+
+  try {
+    await window.api.patch(`/upgrade-to-provider/${userId}`, providerData);
+    localStorage.setItem("userRole", "provider"); // Update local session
+    showToast("Profile Upgraded! Welcome to the Provider Dashboard.", "success");
+    window.location.href = "dashboard.html";
+  } catch (err) {
+    showToast(err.message || "Error upgrading profile.", "error");
+  }
+}
+  </script>
+</body>
+
+</html>
